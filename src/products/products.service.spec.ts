@@ -3,7 +3,7 @@ import { getRepositoryToken } from "@nestjs/typeorm";
 import { Product } from './entities/product.entity';
 import { ProductsService } from "./products.service";
 import { ProductImage } from './entities/product-image.entity';
-import { Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 
 describe('ProductService', () => {
 let service: ProductsService;
@@ -14,8 +14,8 @@ const mockProductRepository = {
     save: jest.fn().mockImplementation( product => Promise.resolve({ id: Date.now(), ...product }))
 };
 
-const mockProductImageRepository = {
-
+const mockDataSourceRepository = {
+    //Aqui deberian ir las funciones de datasource. 
 };
 
     beforeEach(async () => {
@@ -28,6 +28,10 @@ const mockProductImageRepository = {
                 },
                 {
                     provide: getRepositoryToken(ProductImage),
+                    useValue: mockProductRepository,
+                },
+                {
+                    provide: DataSource,
                     useValue: mockProductRepository,
                 },
             ],
