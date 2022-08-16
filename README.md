@@ -13,7 +13,12 @@
 6. Levantar: ```yarn start:dev```
 7. Ejecutar SEED ```http://localhost:3000/api/seed```
 
+# Documentación
+debe estar iniciado el proyecto
+1. http://localhost:3000/api
+
 # Test
+
 1. Ejecutar test ``` yarn run test --watchAll ```
 2. Ver detalle en test: una vez ejecutado el test, con el 
 mensaje de error en terminal, en las opciones, ir a opcion P,
