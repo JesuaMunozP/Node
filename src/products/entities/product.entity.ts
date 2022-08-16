@@ -80,13 +80,13 @@ export class Product {
     sizes?: string[];
 
     @ApiProperty({
-        example: '["male","female"]',
+        example: 'female',
         description: 'Gender',
-        default: []
+        default: ''
     })
     @Column('text',{
         nullable: true,
-        default: []
+        default: ''
     })
     gender?: string;
 
