@@ -1,8 +1,8 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
-import { Product } from './entities/product.entity';
-import { ProductsService } from "./products.service";
-import { ProductImage } from './entities/product-image.entity';
+import { Product } from '../entities/product.entity';
+import { ProductsService } from "../products.service";
+import { ProductImage } from '../entities/product-image.entity';
 import { DataSource, Repository } from "typeorm";
 
 describe('ProductService', () => {
@@ -32,7 +32,7 @@ const mockDataSourceRepository = {
                 },
                 {
                     provide: DataSource,
-                    useValue: mockProductRepository,
+                    useValue: mockDataSourceRepository,
                 },
             ],
         }).compile();
