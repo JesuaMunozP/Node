@@ -16,7 +16,13 @@ describe('ProductsController', () => {
         update: jest.fn((id, dto) => ({
             id,
             ...dto
-        }))
+        })),
+        findOnePlain: jest.fn(id => {
+            return {
+                id: '1',
+                title: 'Product Name'
+            }
+        })
     };
 
     beforeEach( async () => {
@@ -28,18 +34,14 @@ describe('ProductsController', () => {
         controller = module.get<ProductsController>(ProductsController);
     });
 
+    it('should be defined', () => {
+        expect(controller).toBeDefined;
+    });
+
     it('should create a new product', () => {
-        expect(controller.create({
-            title: "Product Name",
-            sizes: [],
-            gender: "",
-            tags: []
-        })).toEqual({
+        expect(controller.create({ title: "Relaxed T Logo Hat" })).toEqual({
             id: '1',
-            title: "Product Name",
-            sizes: [],
-            gender: "",
-            tags: []
+            title: "Relaxed T Logo Hat",
         });
     });
 
@@ -48,6 +50,13 @@ describe('ProductsController', () => {
         expect(controller.update('2', dto  )).toEqual({
             id: '2',
             ...dto,
+        });
+    });
+
+    it('should find one product', () => {
+        expect(controller.findOne( 'Product Name' )).toEqual({
+            id: '1',
+            title: "Product Name"
         });
     });
 
