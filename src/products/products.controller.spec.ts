@@ -22,7 +22,22 @@ describe('ProductsController', () => {
                 id: '1',
                 title: 'Product Name'
             }
-        })
+        }),
+        findAll: jest.fn( dto => {
+            let prod1 = { 
+                id: 1,
+                title: '1'
+            }
+
+            let prod2 = { 
+                id: 2,
+                title: '2'
+            }
+            return {
+                prod1, prod2
+            }
+        }),
+
     };
 
     beforeEach( async () => {
@@ -58,6 +73,25 @@ describe('ProductsController', () => {
             id: '1',
             title: "Product Name"
         });
+    });
+
+    it('should get all products', () => {
+        let prod1 = { 
+            id: 1,
+            title: '1'
+        }
+
+        let prod2 = { 
+            id: 2,
+            title: '2'
+        }
+        const pagDto = {
+            limit: 2,
+            offset: 1
+        }
+        expect(controller.findAll(pagDto)).toEqual({
+           prod1, prod2
+        });;
     });
 
 });
