@@ -37,7 +37,9 @@ describe('ProductsController', () => {
                 prod1, prod2
             }
         }),
-
+        remove: jest.fn( id => {
+            return true;
+        } ),
     };
 
     beforeEach( async () => {
@@ -76,12 +78,12 @@ describe('ProductsController', () => {
     });
 
     it('should get all products', () => {
-        let prod1 = { 
+        let prod1 = {
             id: 1,
             title: '1'
         }
 
-        let prod2 = { 
+        let prod2 = {
             id: 2,
             title: '2'
         }
@@ -92,6 +94,10 @@ describe('ProductsController', () => {
         expect(controller.findAll(pagDto)).toEqual({
            prod1, prod2
         });;
+    });
+
+    it('should delete a product', () => {
+        expect(controller.remove('1')).toEqual(true);
     });
 
 });
