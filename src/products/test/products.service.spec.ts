@@ -11,27 +11,19 @@ import { PaginationDto } from '../../common/dtos/pagination.dto';
 describe('ProductService', () => {
 let service: ProductsService;
 let productImage: Repository<ProductImage>;
-let connection: Connection;
 
-const qr = {
-    manager: {},
-  } as QueryRunner;
-
-  class ConnectionMock {
-    createQueryRunner(mode?: "master" | "slave"): QueryRunner {
-      return qr;
-    }
-  }
 const mockProductRepository = {
     create: jest.fn().mockImplementation( dto => dto ),
     save: jest.fn().mockImplementation( product => Promise.resolve({ id: Date.now(), ...product })),
     findOneBy: jest.fn().mockImplementation( product => Promise.resolve({ id : Date.now()})),
     findOne: jest.fn().mockImplementation( product => Promise.resolve({ id : Date.now()})),
-    update: jest.fn(),
+    update: jest.fn().mockImplementation( product => Promise.resolve({ id : '033ae036-6a20-4760-a11c-f83667474085', ...product})),
     find: jest.fn(),
     preload: jest.fn(),
     remove: jest.fn(),
     createQueryBuilder : jest.fn(),
+    createQueryRunner: jest.fn(),
+   // update: jest.fn(),
 };
 
 const mockDataSourceRepository = {
@@ -39,17 +31,6 @@ const mockDataSourceRepository = {
 };
 
     beforeEach(async () => {
-
-        Object.assign(qr.manager, {
-            save: jest.fn()
-        });
-
-        qr.connect = jest.fn();
-        qr.release = jest.fn();
-        qr.startTransaction = jest.fn();
-        qr.commitTransaction = jest.fn();
-        qr.rollbackTransaction = jest.fn();
-        qr.release = jest.fn();
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -66,16 +47,11 @@ const mockDataSourceRepository = {
                     provide: DataSource,
                     useValue: mockDataSourceRepository,
                 },
-                {
-                    provide: Connection,
-                    useClass: ConnectionMock,
-                },
             ],
         }).compile();
 
         service = module.get<ProductsService>(ProductsService);
         productImage = module.get<Repository<ProductImage>>(getRepositoryToken(ProductImage));
-        connection = module.get<Connection>(Connection);
     });
 
     it('should be defined', () =>{
@@ -108,7 +84,7 @@ const mockDataSourceRepository = {
             product.tags = [];
             product.images = ['1','2','3'];
 
-            mockProductRepository.save.mockReturnValue(product);
+           // mockProductRepository.save.mockReturnValue(product);
             mockProductRepository.create.mockReturnValue(product);
 
             const saveProduct = await service.create(product);
@@ -183,4 +159,57 @@ const mockDataSourceRepository = {
             expect(mockProductRepository.findOne).toBeDefined();
         });
       });
+
+    it('Should update a user', async () => {
+
+       /* const product = {
+            id: '033ae036-6a20-4760-a11c-f83667474085',
+            title: 'title',
+            price: 200,
+            description: 'description',
+            slug: 'slug',
+            stock: 10,
+            sizes: ['s','m'],
+            gender: 'gender',
+            tags: [],
+            images: ['1','2','3'],
+        }*/
+        const product = new CreateProductDto();
+            product.title = 'title';
+            product.price = 200;
+            product.description = 'description';
+            product.slug = 'slug';
+            product.stock = 10;
+            product.sizes = ['s','m'];
+            product.gender = 'gender';
+            product.tags = [];
+            product.images = ['1','2','3'];
+
+        const productUpdate = {
+            title: 'titleUpdate'
+        }
+
+        mockProductRepository.preload.mockReturnValue(product);
+        mockProductRepository.update.mockReturnValue({
+            ...product,
+            ...productUpdate,
+        });
+
+        mockProductRepository.create.mockReturnValue({
+            ...product,
+            ...productUpdate,
+        })
+
+         const resultProduct = await service.update('033ae036-6a20-4760-a11c-f83667474085', {
+            ...product,
+            title: 'titleUpdate',
+        });
+
+    });
+
+    it('should expect an error trying to update a product', async () => {
+        await service.update('033ae036-6a20-4760-a11c-f83667474085',{ title : 'Test'}).catch(e => {
+            expect(e);
+        });
+    });
 });
