@@ -5,19 +5,16 @@ import { ProductsService } from '../products.service';
 import { ProductImage } from '../entities/product-image.entity';
 import { DataSource, Repository, QueryRunner, QueryBuilder } from 'typeorm';
 import { CreateProductDto } from '../dto/create-product.dto';
-import { HttpException } from '@nestjs/common';
-import e from 'express';
-import { UpdateProductDto } from '../dto/update-product.dto';
+import { HttpException, NotFoundException } from '@nestjs/common';
 
-const objQuery = {
+let objQuery = {
     connect: jest.fn(),
     startTransaction: jest.fn(),
     rollbackTransaction: jest.fn(),
     commitTransaction: jest.fn(),
     release: jest.fn(),
+    delete: jest.fn(),
 };
-
-let queryRunner: QueryRunner;
 
 describe('ProductService', () => {
     let service: ProductsService;
@@ -28,8 +25,8 @@ describe('ProductService', () => {
         save: jest.fn().mockImplementation((product) => Promise.resolve({ id: Date.now(), ...product }),),
         findOneBy: jest.fn().mockImplementation((product) => Promise.resolve({ id: Date.now() })),
         findOne: jest.fn().mockImplementation((product) => Promise.resolve({ id: Date.now() })),
-        //findOne: jest.fn().mockImplementation((product) => ({title: 'title'})),
-        update: jest.fn(),
+        update: jest.fn().mockImplementation( (dto) => ({ id: Date.now(), ...dto})),
+        //update: jest.fn().mockImplementation((id: '033ae036-6a20-4760-a11c-f83667474085') => {id: '033ae036-6a20-4760-a11c-f83667474085'}),
         find: jest.fn(),
         preload: jest.fn(),
         remove: jest.fn(),
@@ -64,6 +61,7 @@ describe('ProductService', () => {
         productImage = module.get<Repository<ProductImage>>(
             getRepositoryToken(ProductImage),
         );
+
     });
 
     it('should be defined', () => {
@@ -87,7 +85,6 @@ describe('ProductService', () => {
 
     describe('should create a new product and return', () => {
         it('should create a new product and return', async () => {
-
             const product = new CreateProductDto();
             product.title = 'title';
             product.price = 200;
@@ -98,11 +95,8 @@ describe('ProductService', () => {
             product.gender = 'gender';
             product.tags = [];
             product.images = ['1', '2', '3'];
-
             mockProductRepository.create.mockReturnValue(product);
-
             const saveProduct = await service.create(product);
-
             expect(saveProduct).toMatchObject(product);
         });
 
@@ -117,7 +111,12 @@ describe('ProductService', () => {
         await service.findOne(null).catch((e) => {
             expect(e);
         });
+    });
 
+    it('test', async () => {
+        await service.findOnePlain(null).catch((e) => {
+            expect(e);
+        });
     });
 
     describe('When search All Products', () => {
@@ -160,26 +159,19 @@ describe('ProductService', () => {
 
             await mockProductRepository.findOne.mockReturnValue(productDelete);
             const productDeleted = await service.remove(productDelete.id);
-
             expect(await mockProductRepository.findOne).toBeDefined();
         });
     });
 
     describe('Update a product', () => {
-        it('update() should return error', async () => {
+        it('update() should update a product', async () => {
             const product = new CreateProductDto();
             product.title = 'title';
-            product.price = 200;
-            product.description = 'description';
             product.slug = 'slug';
-            product.stock = 10;
-            product.sizes = ['s', 'm'];
-            product.gender = 'gender';
-            product.tags = [];
             product.images = ['1', '2', '3'];
 
             const productUpdate = {
-                title: 'titleUpdate',
+                images: ['1', '2', '3', '4'],
             };
 
             await mockProductRepository.preload.mockReturnValue(product);
@@ -193,12 +185,17 @@ describe('ProductService', () => {
                 ...product,
                 ...productUpdate,
             });
-
         });
     });
 
     it('should expect an error trying to update a product', async () => {
         await service.update('033ae036-6a20-4760-a11c-f83667474085', { title: 'Test' }).catch((e) => {
+            expect(e);
+        });
+    });
+
+    it('should update a product', async () => {
+        await service.update('033ae036-6a20-4760-a11c-f83667474085',  {images: ['1', '2', '3']}).catch((e) => {
             expect(e);
         });
     });
@@ -209,5 +206,4 @@ describe('ProductService', () => {
             images: [],
         });
     });
-
 });
