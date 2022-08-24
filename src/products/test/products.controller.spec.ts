@@ -51,53 +51,59 @@ describe('ProductsController', () => {
         controller = module.get<ProductsController>(ProductsController);
     });
 
-    it('should be defined', () => {
-        expect(controller).toBeDefined;
-    });
-
-    it('should create a new product', () => {
-        expect(controller.create({ title: "Relaxed T Logo Hat" })).toEqual({
-            id: '1',
-            title: "Relaxed T Logo Hat",
+    describe('Should create a products', () => {
+        it('create(), should create a new product', () => {
+            expect(controller.create({ title: "Relaxed T Logo Hat" })).toEqual({
+                id: '1',
+                title: "Relaxed T Logo Hat",
+            });
         });
     });
 
-    it('should update a product', () => {
-        const dto = { title: 'Product Name'};
-        expect(controller.update('2', dto  )).toEqual({
-            id: '2',
-            ...dto,
+    describe('Should update a product', () => {
+        it('update(), should update a product', () => {
+            const dto = { title: 'Product Name'};
+            expect(controller.update('2', dto  )).toEqual({
+                id: '2',
+                ...dto,
+            });
         });
     });
 
-    it('should find one product', () => {
-        expect(controller.findOne( 'Product Name' )).toEqual({
-            id: '1',
-            title: "Product Name"
+    describe('Should return a product by parameter', () => {
+        it('findOne(), should find one product', () => {
+            expect(controller.findOne( 'Product Name' )).toEqual({
+                id: '1',
+                title: "Product Name"
+            });
         });
     });
 
-    it('should get all products', () => {
-        let prod1 = {
-            id: 1,
-            title: '1'
-        }
+    describe('Should return a list of products ', () => {
+        it('findAll(), should get all products', () => {
+            let prod1 = {
+                id: 1,
+                title: '1'
+            }
 
-        let prod2 = {
-            id: 2,
-            title: '2'
-        }
-        const pagDto = {
-            limit: 2,
-            offset: 1
-        }
-        expect(controller.findAll(pagDto)).toEqual({
-           prod1, prod2
-        });;
+            let prod2 = {
+                id: 2,
+                title: '2'
+            }
+            const pagDto = {
+                limit: 2,
+                offset: 1
+            }
+            expect(controller.findAll(pagDto)).toEqual({
+            prod1, prod2
+            });
+        });
     });
 
-    it('should delete a product', () => {
-        expect(controller.remove('1')).toEqual(true);
+    describe('Should delete a products by parameter', () => {
+        it('delete(), should delete a product', () => {
+            expect(controller.remove('1')).toEqual(true);
+        });
     });
 
 });

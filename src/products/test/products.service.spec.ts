@@ -89,92 +89,23 @@ describe('ProductService', () => {
         expect(service).toBeDefined();
     });
 
-    it('should create a new product and return', async () => {
-        expect(await service.create({ title: 'Test' })).toEqual({
-            images: [],
-            title: 'Test',
-        });
-    });
-
-    it('should return a product', async () => {
-        expect(
-            await service.findOne('033ae036-6a20-4760-a11c-f83667474085'),
-        ).toEqual({
-            id: expect.any(Number),
-        });
-    });
-
-    it('should return a product', async () => {
-        const whereSpy = jest.fn().mockReturnThis();
-        const mockRepository = jest.fn(() => ({
-            createQueryBuilder: jest.fn(() => ({
-              where: whereSpy,
-            })),
-          }));
-
-        const imageProductUpdate = {
-            id: '1',
-            url: '1',
-            product: '033ae036-6a20-4760-a11c-f83667474085'
-        };
-
-        const product = {
-            id: '033ae036-6a20-4760-a11c-f83667474085',
-            title: 'title',
-            price: 200,
-            description: 'description',
-            slug: 'slug',
-            stock: 10,
-            sizes: ['s', 'm'],
-            gender: 'gender',
-            tags: [],
-            images: ['1'],
-        };
-
-          mockProductRepository.create.mockReturnValue(product);
-          mockProductRepository.create.mockReturnValue(imageProductUpdate);
-          const saveProduct = await service.create(product);
-          mockProductRepository.find.mockReturnValue(product);
-    });
-
     describe('should create a new product and return', () => {
-        it('should create a new product and return', async () => {
-            const product = new CreateProductDto();
-            product.title = 'title';
-            product.price = 200;
-            product.description = 'description';
-            product.slug = 'slug';
-            product.stock = 10;
-            product.sizes = ['s', 'm'];
-            product.gender = 'gender';
-            product.tags = [];
-            product.images = ['1', '2', '3'];
-            mockProductRepository.create.mockReturnValue(product);
-            const saveProduct = await service.create(product);
-            expect(saveProduct).toMatchObject(product);
+        it('create(), create a new product and return', async () => {
+            expect(await service.create({ title: 'Test' })).toEqual({
+                images: [],
+                title: 'Test',
+            });
         });
 
-        it('should return a exception when doesnt create a product', async () => {
+        it('create(), should return a exception when doesnt create a product', async () => {
             await expect(service.create(null)).rejects.toThrowError(
                 HttpException,
             );
         });
     });
 
-    it('should return a exception when doesnt create a product', async () => {
-        await service.findOne(null).catch((e) => {
-            expect(e);
-        });
-    });
-
-    it('test', async () => {
-        await service.findOnePlain(null).catch((e) => {
-            expect(e);
-        });
-    });
-
-    describe('When search All Products', () => {
-        it('should be list of all products', async () => {
+    describe('Should return a list of Products', () => {
+        it('findAll(), should return a list of all products', async () => {
             const paginationDto = {
                 limit: 1,
                 offset: 1,
@@ -196,9 +127,47 @@ describe('ProductService', () => {
         });
     });
 
-    describe('When delete a product', () => {
-        it('Should delete a existing product', async () => {
-            const productDelete = {
+    describe('should return a product by id', () => {
+        it('findOne(), should return a product', async () => {
+            expect(
+                await service.findOne('033ae036-6a20-4760-a11c-f83667474085'),
+            ).toEqual({
+                id: expect.any(Number),
+            });
+        });
+
+        it('findOne(), should return a exception when doesnt find a product', async () => {
+            await service.findOne(null).catch((e) => {
+                expect(e);
+            });
+        });
+    });
+
+    describe('Should return a product', () => {
+        it('findOnePlain() should return a product', async () => {
+            expect(await service.findOnePlain('033ae036-6a20-4760-a11c-f83667474085')).toEqual({
+                id: expect.any(Number),
+                images: [],
+            });
+        });
+    });
+
+    describe('Update a product', () => {
+        it('update(), should return a product', async () => {
+            const whereSpy = jest.fn().mockReturnThis();
+            const mockRepository = jest.fn(() => ({
+                createQueryBuilder: jest.fn(() => ({
+                  where: whereSpy,
+                })),
+              }));
+
+            const imageProductUpdate = {
+                id: '1',
+                url: '1',
+                product: '033ae036-6a20-4760-a11c-f83667474085'
+            };
+
+            const product = {
                 id: '033ae036-6a20-4760-a11c-f83667474085',
                 title: 'title',
                 price: 200,
@@ -208,17 +177,15 @@ describe('ProductService', () => {
                 sizes: ['s', 'm'],
                 gender: 'gender',
                 tags: [],
-                images: ['1', '2', '3'],
+                images: ['1'],
             };
-
-            await mockProductRepository.findOne.mockReturnValue(productDelete);
-            const productDeleted = await service.remove(productDelete.id);
-            expect(await mockProductRepository.findOne).toBeDefined();
+    
+              mockProductRepository.create.mockReturnValue(product);
+              mockProductRepository.create.mockReturnValue(imageProductUpdate);
+              const saveProduct = await service.create(product);
+              mockProductRepository.find.mockReturnValue(product);
         });
-    });
-
-    describe('Update a product', () => {
-        it('update() should update a product', async () => {
+        it('update(), should update a product', async () => {
             const product = new CreateProductDto();
             product.title = 'title';
             product.slug = 'slug';
@@ -240,25 +207,39 @@ describe('ProductService', () => {
                 ...productUpdate,
             });
         });
-    });
 
-    it('should expect an error trying to update a product', async () => {
-        await service.update('033ae036-6a20-4760-a11c-f83667474085', { title: 'Test' }).catch((e) => {
-            expect(e);
+        it('update(), should expect an error trying to update a product', async () => {
+            await service.update('033ae036-6a20-4760-a11c-f83667474085', { title: 'Test'}).catch((e) => {
+                expect(e);
+            });
+        });
+
+        it('update(), should delete the images when update a product', async () => {
+            await service.update('033ae036-6a20-4760-a11c-f83667474085', {
+                 images: ['1', '2', '3']}).catch((e) => {
+                expect(e);
+            });
         });
     });
 
-    it('should update a product', async () => {
-        await service.update('033ae036-6a20-4760-a11c-f83667474085', {
-             images: ['1', '2', '3']}).catch((e) => {
-            expect(e);
-        });
-    });
+    describe('Should delete a product', () => {
+        it('remove(), should delete a existing product', async () => {
+            const productDelete = {
+                id: '033ae036-6a20-4760-a11c-f83667474085',
+                title: 'title',
+                price: 200,
+                description: 'description',
+                slug: 'slug',
+                stock: 10,
+                sizes: ['s', 'm'],
+                gender: 'gender',
+                tags: [],
+                images: ['1', '2', '3'],
+            };
 
-    it('findOnePlain() should return a product using findOnePlain', async () => {
-        expect(await service.findOnePlain('033ae036-6a20-4760-a11c-f83667474085')).toEqual({
-            id: expect.any(Number),
-            images: [],
+            await mockProductRepository.findOne.mockReturnValue(productDelete);
+            const productDeleted = await service.remove(productDelete.id);
+            expect(await mockProductRepository.findOne).toBeDefined();
         });
     });
 });
