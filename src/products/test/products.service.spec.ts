@@ -6,6 +6,7 @@ import { ProductImage } from '../entities/product-image.entity';
 import { DataSource, Repository, QueryRunner, QueryBuilder } from 'typeorm';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { HttpException, NotFoundException } from '@nestjs/common';
+import { UpdateProductDto } from '../dto/update-product.dto';
 
 let objQuery = {
     connect: jest.fn(),
@@ -24,17 +25,37 @@ describe('ProductService', () => {
         create: jest.fn().mockImplementation((dto) => dto),
         save: jest.fn().mockImplementation((product) => Promise.resolve({ id: Date.now(), ...product }),),
         findOneBy: jest.fn().mockImplementation((product) => Promise.resolve({ id: Date.now() })),
-        findOne: jest.fn().mockImplementation((product) => Promise.resolve({ id: Date.now() })),
-        update: jest.fn().mockImplementation( (dto) => ({ id: Date.now(), ...dto})),
-        //update: jest.fn().mockImplementation((id: '033ae036-6a20-4760-a11c-f83667474085') => {id: '033ae036-6a20-4760-a11c-f83667474085'}),
+        // findOne: jest.fn().mockImplementation((product) => Promise.resolve({ id: Date.now() })),
+        findOne: jest.fn().mockImplementation((product) => Promise.resolve(product)),
+        update: jest.fn().mockImplementation((product) => Promise.resolve({ id: '033ae036-6a20-4760-a11c-f83667474085', ...product }),),
+        // update: jest.fn().mockImplementation((id: '033ae036-6a20-4760-a11c-f83667474085') => {id: '033ae036-6a20-4760-a11c-f83667474085'}),
         find: jest.fn(),
         preload: jest.fn(),
         remove: jest.fn(),
-        findOnePlain: jest.fn().mockImplementation((dto) => dto)
+        delete: jest.fn(),
+        findOnePlain: jest.fn().mockImplementation((dto) => dto),
+        createQueryBuilder: jest.fn(() => ({
+            delete: () => jest.fn().mockReturnThis(),
+            innerJoinAndSelect: () => jest.fn().mockReturnThis(),
+            innerJoin: () => jest.fn().mockReturnThis(),
+            leftJoinAndSelect: () => jest.fn().mockReturnThis(),
+            leftJoin: () => jest.fn().mockReturnThis(),
+            from: () => jest.fn().mockReturnThis(),
+            where: () => jest.fn().mockReturnThis(),
+            orWhere: () => jest.fn().mockReturnThis(),
+            andWhere: () => jest.fn().mockReturnThis(),
+            execute: () => jest.fn().mockReturnThis(),
+            orderBy: () => jest.fn().mockReturnThis(),
+            take: () => jest.fn().mockReturnThis(),
+            skip: () => jest.fn().mockReturnThis(),
+            getOne: () => jest.fn(),
+            getMany: () => jest.fn(),
+            getManyAndCount: () => jest.fn(),
+        })),
     };
 
+
     const mockDataSourceRepository = {
-        createQueryBuilder: jest.fn(),
         createQueryRunner: jest.fn().mockImplementation(() => objQuery),
     };
 
@@ -81,6 +102,39 @@ describe('ProductService', () => {
         ).toEqual({
             id: expect.any(Number),
         });
+    });
+
+    it('should return a product', async () => {
+        const whereSpy = jest.fn().mockReturnThis();
+        const mockRepository = jest.fn(() => ({
+            createQueryBuilder: jest.fn(() => ({
+              where: whereSpy,
+            })),
+          }));
+
+        const imageProductUpdate = {
+            id: '1',
+            url: '1',
+            product: '033ae036-6a20-4760-a11c-f83667474085'
+        };
+
+        const product = {
+            id: '033ae036-6a20-4760-a11c-f83667474085',
+            title: 'title',
+            price: 200,
+            description: 'description',
+            slug: 'slug',
+            stock: 10,
+            sizes: ['s', 'm'],
+            gender: 'gender',
+            tags: [],
+            images: ['1'],
+        };
+
+          mockProductRepository.create.mockReturnValue(product);
+          mockProductRepository.create.mockReturnValue(imageProductUpdate);
+          const saveProduct = await service.create(product);
+          mockProductRepository.find.mockReturnValue(product);
     });
 
     describe('should create a new product and return', () => {
@@ -195,7 +249,8 @@ describe('ProductService', () => {
     });
 
     it('should update a product', async () => {
-        await service.update('033ae036-6a20-4760-a11c-f83667474085',  {images: ['1', '2', '3']}).catch((e) => {
+        await service.update('033ae036-6a20-4760-a11c-f83667474085', {
+             images: ['1', '2', '3']}).catch((e) => {
             expect(e);
         });
     });

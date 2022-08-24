@@ -70,7 +70,7 @@ export class ProductsService {
 
     if (isUUID(term)) {
       product = await this.productRepository.findOneBy({ id: term });
-    } else {
+    } /*else {
       const queryBuilder = this.productRepository.createQueryBuilder('prod');
       product = await queryBuilder
         .where('UPPER(title) =:title or slug =:slug', {
@@ -79,7 +79,7 @@ export class ProductsService {
         })
         .leftJoinAndSelect('prod.images', 'prodImages')
         .getOne();
-    }
+    }*/
 
     if (!product) throw new NotFoundException(`Product with ${term} not found`);
 
@@ -115,7 +115,6 @@ export class ProductsService {
           this.productImageRepository.create({ url: image }),
         );
       }
-
       // await this.productRepository.save( product );
       await queryRunner.manager.save(product);
 
@@ -138,7 +137,7 @@ export class ProductsService {
   private handleDBExceptions(error: any) {
     this.logger.error(error);
     throw new InternalServerErrorException(
-      'Unexpected error, check server logs',
+     'Unexpected error, check server logs',
     );
   }
 }
